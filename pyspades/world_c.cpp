@@ -495,8 +495,9 @@ void reposition_player(PlayerType *p, Vector *position)
 {
     p->e = p->p = *position;
     float f = p->lastclimb - ftotclk; /* FIXME meaningful name */
-    if (f > -0.25f)
-        p->e.z += (f + 0.25f) / 0.25f;
+    float duration = 0.4f;
+    if (f > -duration)
+        p->e.z += (f + duration) / duration;
 }
 
 inline void set_orientation_vectors(Vector *o, Vector *s, Vector *h)

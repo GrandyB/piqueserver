@@ -111,8 +111,8 @@ class BaseWeapon:
 class Rifle(BaseWeapon):
     id = RIFLE_WEAPON
     name = 'Rifle'
-    delay = 0.5
-    ammo = 10
+    delay = 0.8
+    ammo = 6
     stock = 50
     reload_time = 2.5
     slow_reload = False
