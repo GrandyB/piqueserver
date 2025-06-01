@@ -28,6 +28,13 @@
 #define FALL_DAMAGE_SCALAR 4096
 #define WEAPON_PRIMARY 1
 
+#define AUTOCLIMB_DURATION 0.25F
+#define AUTOCLIMB_SLOWDOWN 0.5F
+#define LANDING_SLOWDOWN 0.85F
+// #define AUTOCLIMB_DURATION 0.4F
+// #define AUTOCLIMB_SLOWDOWN 0.02F
+// #define LANDING_SLOWDOWN 0.85F
+
 // common.h
 #define CUBE_ARRAY_LENGTH 64
 #include "common_c.h"
@@ -495,7 +502,7 @@ void reposition_player(PlayerType *p, Vector *position)
 {
     p->e = p->p = *position;
     float f = p->lastclimb - ftotclk; /* FIXME meaningful name */
-    float duration = 0.4f;
+    float duration = (float) AUTOCLIMB_DURATION;
     if (f > -duration)
         p->e.z += (f + duration) / duration;
 }
@@ -633,8 +640,9 @@ void boxclipmove(PlayerType *p)
 
     if (climb)
     {
-        p->v.x *= 0.5f;
-        p->v.y *= 0.5f;
+        float slowdown = (float) AUTOCLIMB_SLOWDOWN;
+        p->v.x *= slowdown;
+        p->v.y *= slowdown;
         p->lastclimb = ftotclk;
         nz--;
         m = -1.35f;
@@ -663,6 +671,7 @@ void boxclipmove(PlayerType *p)
     else
         p->p.z = nz - offset;
 
+
     reposition_player(p, &p->p);
 }
 
@@ -687,6 +696,10 @@ long move_player(PlayerType *p)
 
     if ((p->mf || p->mb) && (p->ml || p->mr))
         f *= sqrt(2) / 2; //if strafe + forward/backwards then limit diagonal velocity
+
+    //float autoslow = 0.02F;
+    //float mod = ftotclk > p->lastclimb + 0.4f ? 1.0F : autoslow;
+    //f *= mod;
 
     if (p->mf)
     {
@@ -718,14 +731,17 @@ long move_player(PlayerType *p)
         f = fsynctics * 4.f + 1; //ground friction
     p->v.x /= f;
     p->v.y /= f;
+    
+
     float f2 = p->v.z;
     boxclipmove(p);
     //hit ground... check if hurt
     if (!p->v.z && (f2 > FALL_SLOW_DOWN))
     {
         //slow down on landing
-        p->v.x *= 0.5f;
-        p->v.y *= 0.5f;
+        float landingSlow = (float) LANDING_SLOWDOWN;
+        p->v.x *= landingSlow;
+        p->v.y *= landingSlow;
 
         //return fall damage
         if (f2 > FALL_DAMAGE_VELOCITY)
